@@ -1,1 +1,478 @@
-file:///Users/aleksandr/Downloads/slobo_fit_3.html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Slobo Fit</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1e1e1e;
+    --border: #2a2a2a; --accent: #4fc3f7; --green: #66bb6a;
+    --red: #ef5350; --text: #f0f0f0; --muted: #888;
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'Inter', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); min-height: 100vh; display: flex; flex-direction: column; max-width: 480px; margin: 0 auto; }
+  .header { padding: 20px 20px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 14px; background: var(--surface); }
+  .logo-circle { width: 46px; height: 46px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 18px; color: #002a3a; flex-shrink: 0; letter-spacing: 1px; cursor: pointer; }
+  .header-text h1 { font-family: var(--font-display); font-size: 26px; letter-spacing: 2px; color: var(--text); line-height: 1; }
+  .header-text h1 span { color: var(--accent); }
+  .header-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .nav { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+  .nav-btn { flex: 1; padding: 12px 4px 10px; font-size: 11px; font-family: var(--font-body); font-weight: 500; color: var(--muted); background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; transition: color 0.2s, border-color 0.2s; }
+  .nav-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .content { flex: 1; overflow-y: auto; padding: 16px; }
+  .section { display: none; animation: fadeIn 0.2s ease; }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  .gender-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .gender-btn { flex: 1; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1.5px solid var(--border); background: var(--surface2); color: var(--muted); transition: all 0.2s; font-family: var(--font-body); }
+  .gender-btn.active { background: var(--accent); color: #002a3a; border-color: var(--accent); }
+  .sec-label { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 10px; }
+  .workout-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; cursor: pointer; transition: border-color 0.2s; }
+  .workout-card:hover { border-color: var(--accent); }
+  .workout-day { font-size: 11px; color: var(--accent); font-weight: 600; letter-spacing: 0.5px; }
+  .workout-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .tag { background: #1a2a35; color: var(--accent); padding: 3px 9px; border-radius: 6px; font-size: 10px; font-weight: 500; }
+  .tag.green { background: #1a2a1a; color: var(--green); }
+  .exercises { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; display: none; }
+  .exercises.open { display: block; }
+  .ex-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #1a1a1a; font-size: 12px; }
+  .ex-name { color: var(--text); }
+  .ex-sets { color: var(--muted); }
+  .nut-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+  .nut-btn { flex: 1; padding: 8px 4px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1.5px solid var(--border); background: var(--surface2); color: var(--muted); transition: all 0.2s; font-family: var(--font-body); }
+  .nut-btn.active.bulk { background: var(--accent); color: #002a3a; border-color: var(--accent); }
+  .nut-btn.active.cut { background: var(--red); color: #fff; border-color: var(--red); }
+  .nut-btn.active.maint { background: var(--green); color: #002a00; border-color: var(--green); }
+  .kcal-banner { border-radius: 14px; padding: 16px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .kcal-banner.bulk { background: #0d2030; border: 1px solid #1a4060; }
+  .kcal-banner.cut { background: #200d0d; border: 1px solid #401a1a; }
+  .kcal-banner.maint { background: #0d2010; border: 1px solid #1a4020; }
+  .kcal-num { font-family: var(--font-display); font-size: 36px; letter-spacing: 2px; }
+  .kcal-num.bulk { color: var(--accent); }
+  .kcal-num.cut { color: var(--red); }
+  .kcal-num.maint { color: var(--green); }
+  .kcal-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .macros { display: flex; gap: 10px; }
+  .macro-pill { background: var(--surface2); border-radius: 8px; padding: 6px 10px; text-align: center; font-size: 10px; color: var(--muted); }
+  .macro-val { font-size: 14px; font-weight: 600; color: var(--text); display: block; }
+  .meal-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; }
+  .meal-time { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .meal-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .meal-kcal { font-size: 12px; font-weight: 600; }
+  .meal-kcal.bulk { color: var(--accent); }
+  .meal-kcal.cut { color: var(--red); }
+  .meal-kcal.maint { color: var(--green); }
+  .meal-macro { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .prog-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 10px; }
+  .prog-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+  .prog-bar-bg { height: 8px; background: var(--surface2); border-radius: 6px; }
+  .prog-bar { height: 8px; border-radius: 6px; }
+  .prog-bar.blue { background: var(--accent); }
+  .prog-bar.green { background: var(--green); }
+  .prog-info { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px; text-align: center; }
+  .stat-num { font-family: var(--font-display); font-size: 32px; color: var(--accent); letter-spacing: 1px; }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* ADMIN */
+  .admin-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; align-items: center; justify-content: center; }
+  .admin-overlay.show { display: flex; }
+  .admin-box { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 28px 24px; width: 90%; max-width: 380px; }
+  .admin-title { font-family: var(--font-display); font-size: 24px; color: var(--accent); letter-spacing: 2px; margin-bottom: 6px; }
+  .admin-sub { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+  .admin-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; color: var(--text); font-size: 14px; font-family: var(--font-body); margin-bottom: 12px; outline: none; }
+  .admin-input:focus { border-color: var(--accent); }
+  .admin-btn { width: 100%; padding: 12px; border-radius: 10px; border: none; background: var(--accent); color: #002a3a; font-size: 14px; font-weight: 600; cursor: pointer; font-family: var(--font-body); }
+  .admin-btn.danger { background: var(--red); color: #fff; margin-top: 8px; }
+  .admin-btn.secondary { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+  .admin-err { font-size: 12px; color: var(--red); margin-bottom: 10px; display: none; }
+  .admin-panel { display: none; }
+  .admin-panel.show { display: block; }
+  .admin-section { margin-bottom: 24px; }
+  .admin-section-title { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  .edit-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 8px; }
+  .edit-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+  .edit-label { font-size: 11px; color: var(--muted); width: 60px; flex-shrink: 0; }
+  .edit-field { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; color: var(--text); font-size: 12px; font-family: var(--font-body); outline: none; }
+  .edit-field:focus { border-color: var(--accent); }
+  .save-btn { width: 100%; padding: 11px; border-radius: 10px; border: none; background: var(--accent); color: #002a3a; font-size: 13px; font-weight: 600; cursor: pointer; font-family: var(--font-body); margin-top: 6px; }
+  .save-ok { font-size: 12px; color: var(--green); text-align: center; margin-top: 6px; display: none; }
+  textarea.edit-field { resize: vertical; min-height: 60px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-circle" onclick="openAdmin()" title="Админ">SF</div>
+  <div class="header-text">
+    <h1>SLOBO<span>FIT</span></h1>
+    <div class="header-sub">by Aleksandr Slobodianiuk · @alex.slobo</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn active" onclick="showTab('workout', this)">🏋️ Тренировки</button>
+  <button class="nav-btn" onclick="showTab('nutrition', this)">🥗 Питание</button>
+  <button class="nav-btn" onclick="showTab('progress', this)">📊 Прогресс</button>
+</div>
+
+<div class="content">
+
+  <!-- WORKOUTS -->
+  <div class="section active" id="tab-workout">
+    <div class="gender-tabs">
+      <button class="gender-btn active" onclick="switchGender('m', this)">♂ Мужчины</button>
+      <button class="gender-btn" onclick="switchGender('f', this)">♀ Женщины</button>
+    </div>
+    <div id="workouts-m"></div>
+    <div id="workouts-f" style="display:none;"></div>
+  </div>
+
+  <!-- NUTRITION -->
+  <div class="section" id="tab-nutrition">
+    <div class="nut-tabs">
+      <button class="nut-btn active bulk" onclick="switchNut('bulk', this)">📈 Набор</button>
+      <button class="nut-btn cut" onclick="switchNut('cut', this)">📉 Дефицит</button>
+      <button class="nut-btn maint" onclick="switchNut('maint', this)">⚖️ Поддержание</button>
+    </div>
+    <div id="nut-bulk"></div>
+    <div id="nut-cut" style="display:none;"></div>
+    <div id="nut-maint" style="display:none;"></div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="section" id="tab-progress">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num">12</div><div class="stat-label">🔥 дней серия</div></div>
+      <div class="stat-card"><div class="stat-num" id="subs-count">847</div><div class="stat-label">подписчиков</div></div>
+    </div>
+    <div class="prog-card">
+      <div class="prog-title">Тренировки на этой неделе</div>
+      <div class="prog-bar-bg"><div class="prog-bar blue" style="width:60%"></div></div>
+      <div class="prog-info"><span>3 из 5</span><span style="color:var(--accent)">60%</span></div>
+    </div>
+    <div class="prog-card">
+      <div class="prog-title">Соблюдение рациона</div>
+      <div class="prog-bar-bg"><div class="prog-bar green" style="width:80%"></div></div>
+      <div class="prog-info"><span>4 из 5 дней</span><span style="color:var(--green)">80%</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ADMIN OVERLAY -->
+<div class="admin-overlay" id="adminOverlay">
+  <div class="admin-box">
+
+    <!-- LOGIN -->
+    <div id="adminLogin">
+      <div class="admin-title">ADMIN</div>
+      <div class="admin-sub">Панель управления Slobo Fit</div>
+      <div class="admin-err" id="adminErr">Неверный пароль</div>
+      <input class="admin-input" type="password" id="adminPass" placeholder="Пароль" onkeydown="if(event.key==='Enter')checkPass()">
+      <button class="admin-btn" onclick="checkPass()">Войти</button>
+      <button class="admin-btn secondary" style="margin-top:8px" onclick="closeAdmin()">Отмена</button>
+    </div>
+
+    <!-- PANEL -->
+    <div class="admin-panel" id="adminPanel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div class="admin-title" style="margin:0">ПАНЕЛЬ</div>
+        <button onclick="closeAdmin()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">✕</button>
+      </div>
+
+      <!-- WORKOUTS MALE -->
+      <div class="admin-section">
+        <div class="admin-section-title">💪 Тренировки — мужчины</div>
+        <div id="admin-workouts-m"></div>
+        <button class="save-btn" onclick="saveWorkouts('m')">Сохранить тренировки (муж)</button>
+        <div class="save-ok" id="ok-wm">✓ Сохранено!</div>
+      </div>
+
+      <!-- WORKOUTS FEMALE -->
+      <div class="admin-section">
+        <div class="admin-section-title">💪 Тренировки — женщины</div>
+        <div id="admin-workouts-f"></div>
+        <button class="save-btn" onclick="saveWorkouts('f')">Сохранить тренировки (жен)</button>
+        <div class="save-ok" id="ok-wf">✓ Сохранено!</div>
+      </div>
+
+      <!-- NUTRITION -->
+      <div class="admin-section">
+        <div class="admin-section-title">🥗 Питание</div>
+        <div id="admin-nutrition"></div>
+        <button class="save-btn" onclick="saveNutrition()">Сохранить питание</button>
+        <div class="save-ok" id="ok-nut">✓ Сохранено!</div>
+      </div>
+
+      <button class="admin-btn danger" onclick="logout()">Выйти из панели</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const PASS = 'Ssasha2911';
+
+// ===== DEFAULT DATA =====
+const defaultData = {
+  workouts_m: [
+    { day: 'День 1', title: 'Грудь + Трицепс', place: 'Зал', time: '60 мин', exercises: [
+      {name:'Жим штанги лёжа', sets:'4×8–10'}, {name:'Жим гантелей под углом', sets:'3×10–12'},
+      {name:'Разводка гантелей', sets:'3×12'}, {name:'Французский жим', sets:'3×12'}, {name:'Трицепс на блоке', sets:'3×15'}
+    ]},
+    { day: 'День 2', title: 'Спина + Бицепс', place: 'Зал', time: '55 мин', exercises: [
+      {name:'Становая тяга', sets:'4×6–8'}, {name:'Тяга штанги в наклоне', sets:'4×10'},
+      {name:'Подтягивания', sets:'3×max'}, {name:'Сгибания со штангой', sets:'3×12'}, {name:'Молотки с гантелями', sets:'3×12'}
+    ]},
+    { day: 'День 3', title: 'Ноги + Ягодицы', place: 'Зал', time: '70 мин', exercises: [
+      {name:'Приседания со штангой', sets:'4×8–10'}, {name:'Жим ногами', sets:'3×12'},
+      {name:'Выпады с гантелями', sets:'3×12'}, {name:'Разгибания ног', sets:'3×15'}, {name:'Сгибания ног', sets:'3×15'}, {name:'Икры стоя', sets:'4×20'}
+    ]},
+    { day: 'День 4', title: 'Плечи + Пресс', place: 'Зал', time: '50 мин', exercises: [
+      {name:'Жим штанги стоя', sets:'4×8–10'}, {name:'Махи гантелями в стороны', sets:'4×12'},
+      {name:'Тяга к подбородку', sets:'3×12'}, {name:'Скручивания', sets:'3×20'}, {name:'Планка', sets:'3×60 сек'}
+    ]},
+    { day: 'День 5', title: 'Полное тело + Кардио', place: 'Зал/Дом', time: '45 мин', exercises: [
+      {name:'Бёрпи', sets:'4×15'}, {name:'Отжимания', sets:'4×20'},
+      {name:'Приседания с прыжком', sets:'3×15'}, {name:'Бег / велосипед', sets:'20 мин'}
+    ]}
+  ],
+  workouts_f: [
+    { day: 'День 1', title: 'Ягодицы + Ноги', place: 'Зал', time: '50 мин', exercises: [
+      {name:'Приседания со штангой', sets:'4×12'}, {name:'Ягодичный мостик', sets:'4×15'},
+      {name:'Выпады назад', sets:'3×12'}, {name:'Отведение ноги в кроссовере', sets:'3×15'}, {name:'Сгибания ног лёжа', sets:'3×15'}
+    ]},
+    { day: 'День 2', title: 'Верх тела + Тонус', place: 'Зал', time: '45 мин', exercises: [
+      {name:'Жим гантелей лёжа', sets:'3×12'}, {name:'Тяга гантели одной рукой', sets:'3×12'},
+      {name:'Махи в стороны', sets:'3×15'}, {name:'Сгибания на бицепс', sets:'3×12'}, {name:'Трицепс на блоке', sets:'3×15'}
+    ]},
+    { day: 'День 3', title: 'Пресс + Кардио', place: 'Дом/Зал', time: '35 мин', exercises: [
+      {name:'Скручивания', sets:'3×20'}, {name:'Планка', sets:'3×45 сек'},
+      {name:'Велосипед', sets:'3×20'}, {name:'Бег / скакалка', sets:'20 мин'}
+    ]},
+    { day: 'День 4', title: 'Ягодицы + Полное тело', place: 'Дом/Зал', time: '40 мин', exercises: [
+      {name:'Становая тяга на прямых ногах', sets:'4×12'}, {name:'Приседания сумо', sets:'3×15'},
+      {name:'Отжимания с колен', sets:'3×15'}, {name:'Берпи', sets:'3×10'}, {name:'Растяжка', sets:'10 мин'}
+    ]}
+  ],
+  nutrition: {
+    bulk: { kcal: 3000, proteins: 200, fats: 80, carbs: 350, meals: [
+      {time:'07:00 · Завтрак', name:'Овсянка на молоке + 3 яйца', kcal:650, macro:'Б 40г · Ж 20г · У 70г'},
+      {time:'10:30 · Перекус', name:'Творог 5% + банан + орехи', kcal:400, macro:'Б 25г · Ж 15г · У 40г'},
+      {time:'13:00 · Обед', name:'Рис 150г + куриная грудка 200г + овощи', kcal:750, macro:'Б 55г · Ж 10г · У 100г'},
+      {time:'16:00 · Перед тренировкой', name:'Гречка + говядина 150г', kcal:550, macro:'Б 40г · Ж 15г · У 65г'},
+      {time:'20:00 · Ужин', name:'Лосось 150г + овощи + яйца', kcal:650, macro:'Б 50г · Ж 28г · У 25г'}
+    ]},
+    cut: { kcal: 1700, proteins: 160, fats: 55, carbs: 150, meals: [
+      {time:'07:00 · Завтрак', name:'Яйца 3шт + огурец + кофе без сахара', kcal:280, macro:'Б 22г · Ж 14г · У 5г'},
+      {time:'12:00 · Обед', name:'Куриный салат + листья + помидоры', kcal:380, macro:'Б 45г · Ж 10г · У 20г'},
+      {time:'15:00 · Перекус', name:'Творог 0% + огурец', kcal:180, macro:'Б 25г · Ж 2г · У 10г'},
+      {time:'19:00 · Ужин', name:'Рыба на пару 200г + брокколи', kcal:320, macro:'Б 45г · Ж 8г · У 15г'},
+      {time:'21:00 · Перед сном', name:'Творог 0% 150г', kcal:130, macro:'Б 22г · Ж 1г · У 8г'}
+    ]},
+    maint: { kcal: 2300, proteins: 180, fats: 70, carbs: 240, meals: [
+      {time:'07:00 · Завтрак', name:'Творог 5% с ягодами + тост', kcal:420, macro:'Б 30г · Ж 8г · У 50г'},
+      {time:'13:00 · Обед', name:'Макароны из твёрдых сортов + индейка', kcal:650, macro:'Б 45г · Ж 12г · У 80г'},
+      {time:'16:00 · Перекус', name:'Протеиновый коктейль + банан', kcal:320, macro:'Б 30г · Ж 5г · У 40г'},
+      {time:'19:00 · Ужин', name:'Запечённая рыба + рис + овощи', kcal:550, macro:'Б 42г · Ж 14г · У 60г'}
+    ]}
+  }
+};
+
+// ===== STORAGE =====
+function load(key, def) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch(e) { return def; }
+}
+function save(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+}
+
+let data = {
+  workouts_m: load('sf_wm', defaultData.workouts_m),
+  workouts_f: load('sf_wf', defaultData.workouts_f),
+  nutrition:  load('sf_nut', defaultData.nutrition)
+};
+
+// ===== RENDER =====
+function renderWorkouts(gender) {
+  const list = data['workouts_' + gender];
+  const el = document.getElementById('workouts-' + gender);
+  el.innerHTML = '<div class="sec-label">Программа тренировок · ' + list.length + ' дней</div>' +
+    list.map((w, i) => `
+      <div class="workout-card" onclick="toggleEx(this)">
+        <div class="workout-day">${w.day}</div>
+        <div class="workout-title">${w.title}</div>
+        <div class="tags">
+          <span class="tag">${w.place}</span>
+          <span class="tag">${w.time}</span>
+          <span class="tag green">${w.exercises.length} упражнений</span>
+        </div>
+        <div class="exercises">
+          ${w.exercises.map(e => `<div class="ex-row"><span class="ex-name">${e.name}</span><span class="ex-sets">${e.sets}</span></div>`).join('')}
+        </div>
+      </div>`).join('');
+}
+
+function renderNutrition(type) {
+  const n = data.nutrition[type];
+  const el = document.getElementById('nut-' + type);
+  el.innerHTML = `
+    <div class="kcal-banner ${type}">
+      <div><div class="kcal-num ${type}">${n.kcal}</div><div class="kcal-label">ккал в день</div></div>
+      <div class="macros">
+        <div class="macro-pill"><span class="macro-val">${n.proteins}г</span>Белки</div>
+        <div class="macro-pill"><span class="macro-val">${n.fats}г</span>Жиры</div>
+        <div class="macro-pill"><span class="macro-val">${n.carbs}г</span>Углеводы</div>
+      </div>
+    </div>` +
+    n.meals.map(m => `
+      <div class="meal-card">
+        <div class="meal-time">${m.time}</div>
+        <div class="meal-name">${m.name}</div>
+        <div class="meal-kcal ${type}">${m.kcal} ккал</div>
+        <div class="meal-macro">${m.macro}</div>
+      </div>`).join('');
+}
+
+function renderAll() {
+  renderWorkouts('m'); renderWorkouts('f');
+  renderNutrition('bulk'); renderNutrition('cut'); renderNutrition('maint');
+}
+renderAll();
+
+// ===== NAV =====
+function showTab(name, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+function switchGender(g, btn) {
+  document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('workouts-m').style.display = g === 'm' ? 'block' : 'none';
+  document.getElementById('workouts-f').style.display = g === 'f' ? 'block' : 'none';
+}
+function switchNut(type, btn) {
+  document.querySelectorAll('.nut-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  ['bulk','cut','maint'].forEach(t => document.getElementById('nut-' + t).style.display = 'none');
+  document.getElementById('nut-' + type).style.display = 'block';
+}
+function toggleEx(card) { card.querySelector('.exercises').classList.toggle('open'); }
+
+// ===== ADMIN =====
+function openAdmin() {
+  document.getElementById('adminOverlay').classList.add('show');
+  document.getElementById('adminPass').value = '';
+  document.getElementById('adminErr').style.display = 'none';
+}
+function closeAdmin() { document.getElementById('adminOverlay').classList.remove('show'); }
+function logout() {
+  document.getElementById('adminPanel').classList.remove('show');
+  document.getElementById('adminLogin').style.display = 'block';
+  closeAdmin();
+}
+function checkPass() {
+  if (document.getElementById('adminPass').value === PASS) {
+    document.getElementById('adminLogin').style.display = 'none';
+    document.getElementById('adminPanel').classList.add('show');
+    buildAdminPanel();
+  } else {
+    document.getElementById('adminErr').style.display = 'block';
+  }
+}
+
+function buildAdminPanel() {
+  // Workouts male
+  const wm = document.getElementById('admin-workouts-m');
+  wm.innerHTML = data.workouts_m.map((w, i) => `
+    <div class="edit-card">
+      <div class="edit-row"><span class="edit-label">День</span><input class="edit-field" id="wm-day-${i}" value="${w.day}"></div>
+      <div class="edit-row"><span class="edit-label">Название</span><input class="edit-field" id="wm-title-${i}" value="${w.title}"></div>
+      <div class="edit-row"><span class="edit-label">Место</span><input class="edit-field" id="wm-place-${i}" value="${w.place}"></div>
+      <div class="edit-row"><span class="edit-label">Время</span><input class="edit-field" id="wm-time-${i}" value="${w.time}"></div>
+      <div class="edit-label" style="margin-bottom:6px;">Упражнения (каждое с новой строки, формат: Название | подходы)</div>
+      <textarea class="edit-field" id="wm-ex-${i}">${w.exercises.map(e => e.name + ' | ' + e.sets).join('\n')}</textarea>
+    </div>`).join('');
+
+  // Workouts female
+  const wf = document.getElementById('admin-workouts-f');
+  wf.innerHTML = data.workouts_f.map((w, i) => `
+    <div class="edit-card">
+      <div class="edit-row"><span class="edit-label">День</span><input class="edit-field" id="wf-day-${i}" value="${w.day}"></div>
+      <div class="edit-row"><span class="edit-label">Название</span><input class="edit-field" id="wf-title-${i}" value="${w.title}"></div>
+      <div class="edit-row"><span class="edit-label">Место</span><input class="edit-field" id="wf-place-${i}" value="${w.place}"></div>
+      <div class="edit-row"><span class="edit-label">Время</span><input class="edit-field" id="wf-time-${i}" value="${w.time}"></div>
+      <div class="edit-label" style="margin-bottom:6px;">Упражнения (каждое с новой строки, формат: Название | подходы)</div>
+      <textarea class="edit-field" id="wf-ex-${i}">${w.exercises.map(e => e.name + ' | ' + e.sets).join('\n')}</textarea>
+    </div>`).join('');
+
+  // Nutrition
+  const nutEl = document.getElementById('admin-nutrition');
+  const types = [{key:'bulk', label:'📈 Набор'}, {key:'cut', label:'📉 Дефицит'}, {key:'maint', label:'⚖️ Поддержание'}];
+  nutEl.innerHTML = types.map(t => {
+    const n = data.nutrition[t.key];
+    return `<div class="edit-card">
+      <div class="admin-section-title" style="margin-bottom:10px;">${t.label}</div>
+      <div class="edit-row"><span class="edit-label">Ккал</span><input class="edit-field" id="nut-kcal-${t.key}" value="${n.kcal}"></div>
+      <div class="edit-row"><span class="edit-label">Белки г</span><input class="edit-field" id="nut-prot-${t.key}" value="${n.proteins}"></div>
+      <div class="edit-row"><span class="edit-label">Жиры г</span><input class="edit-field" id="nut-fat-${t.key}" value="${n.fats}"></div>
+      <div class="edit-row"><span class="edit-label">Углев г</span><input class="edit-field" id="nut-carb-${t.key}" value="${n.carbs}"></div>
+      <div class="edit-label" style="margin-bottom:6px;">Приёмы пищи (каждый с новой строки: Время | Название | ккал | макро)</div>
+      <textarea class="edit-field" id="nut-meals-${t.key}" style="min-height:100px;">${n.meals.map(m => m.time+'|'+m.name+'|'+m.kcal+'|'+m.macro).join('\n')}</textarea>
+    </div>`;
+  }).join('');
+}
+
+function saveWorkouts(gender) {
+  const list = data['workouts_' + gender];
+  list.forEach((w, i) => {
+    w.day   = document.getElementById('w'+gender+'-day-'+i).value;
+    w.title = document.getElementById('w'+gender+'-title-'+i).value;
+    w.place = document.getElementById('w'+gender+'-place-'+i).value;
+    w.time  = document.getElementById('w'+gender+'-time-'+i).value;
+    const lines = document.getElementById('w'+gender+'-ex-'+i).value.split('\n').filter(l => l.trim());
+    w.exercises = lines.map(l => { const p = l.split('|'); return {name: (p[0]||'').trim(), sets: (p[1]||'').trim()}; });
+  });
+  save('sf_w'+gender, list);
+  renderWorkouts(gender);
+  const ok = document.getElementById('ok-w'+gender);
+  ok.style.display = 'block';
+  setTimeout(() => ok.style.display = 'none', 2000);
+}
+
+function saveNutrition() {
+  ['bulk','cut','maint'].forEach(t => {
+    data.nutrition[t].kcal     = parseInt(document.getElementById('nut-kcal-'+t).value) || 0;
+    data.nutrition[t].proteins = parseInt(document.getElementById('nut-prot-'+t).value) || 0;
+    data.nutrition[t].fats     = parseInt(document.getElementById('nut-fat-'+t).value) || 0;
+    data.nutrition[t].carbs    = parseInt(document.getElementById('nut-carb-'+t).value) || 0;
+    const lines = document.getElementById('nut-meals-'+t).value.split('\n').filter(l => l.trim());
+    data.nutrition[t].meals = lines.map(l => {
+      const p = l.split('|');
+      return { time: (p[0]||'').trim(), name: (p[1]||'').trim(), kcal: parseInt(p[2])||0, macro: (p[3]||'').trim() };
+    });
+  });
+  save('sf_nut', data.nutrition);
+  renderNutrition('bulk'); renderNutrition('cut'); renderNutrition('maint');
+  const ok = document.getElementById('ok-nut');
+  ok.style.display = 'block';
+  setTimeout(() => ok.style.display = 'none', 2000);
+}
+
+if (window.Telegram && window.Telegram.WebApp) {
+  window.Telegram.WebApp.ready();
+  window.Telegram.WebApp.expand();
+}
+</script>
+</body>
+</html>
